@@ -7,7 +7,7 @@ contactPoints:
       - uid: slack-receiver-1
         type: slack
         settings:
-          url: "${SLACK_WEBHOOK_URL}"
+          url: ""
           recipient: "#monitoring-1-alerts"
           title: |
             [{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}
