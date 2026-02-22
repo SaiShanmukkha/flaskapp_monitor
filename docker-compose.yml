@@ -41,7 +41,7 @@ services:
     command: ["-config.file=/etc/loki/loki.yml"]
     volumes:
       - ./loki/loki.yml:/etc/loki/loki.yml:ro
-      - ./data/loki:/loki
+      - loki_data:/loki
 
   promtail:
     image: grafana/promtail:latest
@@ -73,3 +73,4 @@ services:
 
 volumes:
   grafana_data:
+  loki_data:
