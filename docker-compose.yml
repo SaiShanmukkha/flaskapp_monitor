@@ -6,6 +6,21 @@ services:
     ports:
       - "8080:8080"
 
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -21,6 +36,8 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
       - ./data/prometheus:/prometheus
+    depends_on:
+      - alertmanager
 
   node_exporter:
     image: prom/node-exporter:latest
@@ -63,6 +80,7 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
     volumes:
       - grafana_data:/var/lib/grafana
@@ -74,3 +92,4 @@ services:
 volumes:
   grafana_data:
   loki_data:
+  alertmanager_data:

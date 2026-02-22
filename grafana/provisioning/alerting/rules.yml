@@ -1,0 +1,59 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: demo_alerts
+    folder: Alerts
+    interval: 1m
+    rules:
+      - uid: high-error-rate
+        title: DemoAppHighErrorRate
+        condition: C
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Demo app error rate > 5%"
+          description: "The demo app is returning >5% 500s for 1 minute."
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(app_requests_total{code="500"}[2m]))
+              instant: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: prometheus
+            model:
+              expr: sum(rate(app_requests_total[2m]))
+              instant: false
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          - refId: C
+            datasourceUid: "__expr__"
+            model:
+              type: math
+              expression: "$A / $B > 0.05"
+              refId: C
+
+      - uid: node-exporter-down
+        title: NodeExporterDown
+        condition: A
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "node_exporter down"
+          description: "Prometheus cannot scrape node_exporter."
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: up{job="node"} == 0
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
